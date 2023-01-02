@@ -104,15 +104,19 @@ func (*server) CreateMovie(ctx context.Context, req *moviepb.CreateMovieRequest)
 	}, nil
 }
 
-// func (s *server) GetMovies(ctx context.Context, req *moviepb.ReadMoviesRequest) (*moviepb.ReadMoviesResponse, error) {
-// 	fmt.Println("View Movie")
-// 	var data *[]Movie
-// 	res := DB.Find(&data)
-// 	if res.RowsAffected == 0 {
-// 		return nil, errors.New("movie creation unsuccessful")
-// 	}
+func (s *server) GetMovies(ctx context.Context, req *moviepb.ReadMoviesRequest) (*moviepb.ReadMoviesResponse, error) {
+	fmt.Println("View All Movie")
+	movies := []*moviepb.Movie{}
+	res := DB.Table("movies").Select("title", "genre").Scan(&movies)
 
-// }
+	if res.RowsAffected == 0 {
+		return nil, errors.New("movie creation unsuccessful")
+	}
+	return &moviepb.ReadMoviesResponse{
+		Movies: movies,
+	}, nil
+}
+
 func main() {
 	fmt.Println("gRPC server running ...")
 
