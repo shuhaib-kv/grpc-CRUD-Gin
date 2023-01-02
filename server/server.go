@@ -134,12 +134,15 @@ func (*server) UpdateMovie(ctx context.Context, req *moviepb.UpdateMovieRequest)
 	}, nil
 }
 func (*server) DeleteMovie(ctx context.Context, req *moviepb.DeleteMovieRequest) (*moviepb.DeleteMovieResponse, error) {
+	fmt.Println("Delete Movie")
 	movieid := req.GetId()
 	res := DB.Model(&Movie{}).Where("id=?", movieid).Delete(&Movie{})
 	if res.RowsAffected == 0 {
-		return nil, errors.New("movie updation unsuccessful")
+		return nil, errors.New("movie Deletion unsuccessful")
 	}
-	return &moviepb.DeleteMovieResponse{}, nil
+	return &moviepb.DeleteMovieResponse{
+		Success: true,
+	}, nil
 }
 
 func main() {
