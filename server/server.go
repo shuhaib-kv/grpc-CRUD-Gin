@@ -62,15 +62,17 @@ type server struct {
 
 func (*server) GetMovie(ctx context.Context, req *moviepb.ReadMovieRequest) (*moviepb.ReadMovieResponse, error) {
 	fmt.Println("View Movie")
+	Movieid := req.GetId()
 	var data *Movie
-	res := DB.Find(&data)
+	res := DB.Table("movies").Select("title", "genre").Where("id=?", Movieid).Find(&data)
+
 	if res.RowsAffected == 0 {
 		return nil, errors.New("movie creation unsuccessful")
+
 	}
 	return &moviepb.ReadMovieResponse{
 
 		Movie: &moviepb.Movie{
-
 			Id:    data.ID,
 			Title: data.Title,
 			Genre: data.Genre,
@@ -101,18 +103,16 @@ func (*server) CreateMovie(ctx context.Context, req *moviepb.CreateMovieRequest)
 		},
 	}, nil
 }
-func (s *server) GetMovies(ctx context.Context, req *moviepb.ReadMoviesRequest) (*moviepb.ReadMoviesResponse, error) {
-	fmt.Println("View Movie")
-	var data *[]Movie
-	res := DB.Find(&data)
-	if res.RowsAffected == 0 {
-		return nil, errors.New("movie creation unsuccessful")
-	}
-	for _, i := range s.data {
 
-	}
+// func (s *server) GetMovies(ctx context.Context, req *moviepb.ReadMoviesRequest) (*moviepb.ReadMoviesResponse, error) {
+// 	fmt.Println("View Movie")
+// 	var data *[]Movie
+// 	res := DB.Find(&data)
+// 	if res.RowsAffected == 0 {
+// 		return nil, errors.New("movie creation unsuccessful")
+// 	}
 
-}
+// }
 func main() {
 	fmt.Println("gRPC server running ...")
 
