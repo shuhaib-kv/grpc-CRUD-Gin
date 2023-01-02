@@ -119,11 +119,6 @@ func (*server) GetMovies(ctx context.Context, req *moviepb.ReadMoviesRequest) (*
 
 func (*server) UpdateMovie(ctx context.Context, req *moviepb.UpdateMovieRequest) (*moviepb.UpdateMovieResponse, error) {
 	reqMovie := req.GetMovie()
-	// data := Movie{
-	// 	ID:    reqMovie.Id,
-	// 	Title: reqMovie.Title,
-	// 	Genre: reqMovie.Genre,
-	// }
 	fmt.Println(reqMovie)
 	res := DB.Model("").Select("id", "title", "genre").Where("id=?", reqMovie.Id).Updates(Movie{ID: reqMovie.Id, Genre: reqMovie.Genre, Title: reqMovie.Title})
 	if res.RowsAffected == 0 {
@@ -142,7 +137,7 @@ func (*server) DeleteMovie(ctx context.Context, req *moviepb.DeleteMovieRequest)
 	if res.RowsAffected == 0 {
 		return nil, errors.New("Couldnt find movie")
 	}
-	DB.Delete(&Movie{}, movieid)
+	DB.Delete(&Movie{}, "id=?", movieid)
 	return &moviepb.DeleteMovieResponse{
 		Success: true,
 	}, nil
