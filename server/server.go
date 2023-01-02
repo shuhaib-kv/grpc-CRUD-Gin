@@ -107,8 +107,7 @@ func (*server) CreateMovie(ctx context.Context, req *moviepb.CreateMovieRequest)
 func (s *server) GetMovies(ctx context.Context, req *moviepb.ReadMoviesRequest) (*moviepb.ReadMoviesResponse, error) {
 	fmt.Println("View All Movie")
 	movies := []*moviepb.Movie{}
-	res := DB.Table("movies").Select("title", "genre").Scan(&movies)
-
+	res := DB.Table("movies").Select("id", "title", "genre").Scan(&movies)
 	if res.RowsAffected == 0 {
 		return nil, errors.New("movie creation unsuccessful")
 	}
