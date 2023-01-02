@@ -41,6 +41,7 @@ func main() {
 			})
 			return
 		}
+
 		ctx.JSON(http.StatusOK, gin.H{
 			"movies": res.Movies,
 		})
