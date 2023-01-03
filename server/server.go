@@ -21,6 +21,10 @@ func init() {
 	DatabaseConnection()
 }
 
+// type config struct{
+
+//		Port string `mapstructure:"PORT"`
+//	}
 var DB *gorm.DB
 var err error
 
@@ -33,19 +37,28 @@ type Movie struct {
 }
 
 func DatabaseConnection() {
-	viper.SetConfigName(".env")
-	viper.AddConfigPath(".")
+	viper.SetConfigName("app")
+	viper.AddConfigPath("./../.")
+	viper.SetConfigType("env")
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic(fmt.Errorf("Fatal error config file: %s", err))
 	}
-	host := viper.GetString("POSTGRES_HOST")
-	port := viper.GetInt("POSTGRES_PORT")
-	dbUser := viper.GetString("POSTGRES_USER")
-	password := viper.GetString("POSTGRES_PASSWORD")
+	host := viper.GetString("DATABASE_HOST")
+	port := viper.GetInt("DATABASE_PORT")
+	dbUser := viper.GetString("DATABASE_USER")
+	password := viper.GetString("DATABASE_PASSWORD")
 	dbName := viper.GetString("POSTGRES_DB")
+	// fmt.Println(host)
+	// host := "localhost"
+	// port := "5432"
+	// dbUser := "shuhaib"
+	// password := "soib"
+	// dbName := "postgres"
 
-	dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable", host, port, dbUser, dbName, password)
+	fmt.Println(host)
+
+	dsn := fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s sslmode=disable", host, port, dbUser, dbName, password)
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	DB.AutoMigrate(Movie{})
 	if err != nil {

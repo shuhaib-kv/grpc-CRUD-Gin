@@ -1,0 +1,1 @@
+protoc movie.proto --go_out=plugins=grpc:.
