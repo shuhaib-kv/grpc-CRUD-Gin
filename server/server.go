@@ -75,26 +75,26 @@ type server struct {
 	moviepb.UnimplementedMovieServiceServer
 }
 
-func (*server) GetMovie(ctx context.Context, req *moviepb.ReadMovieRequest) (*moviepb.ReadMovieResponse, error) {
-	fmt.Println("View Movie")
-	Movieid := req.GetId()
-	var data *Movie
-	res := DB.Table("movies").Select("title", "genre").Where("id=?", Movieid).Find(&data)
+// func (*server) GetMovie(ctx context.Context, req *moviepb.ReadMovieRequest) (*moviepb.ReadMovieResponse, error) {
+// 	fmt.Println("View Movie")
+// 	Movieid := req.GetId()
+// 	var data *Movie
+// 	res := DB.Table("movies").Select("title", "genre").Where("id=?", Movieid).Find(&data)
 
-	if res.RowsAffected == 0 {
-		return nil, errors.New("movie creation unsuccessful")
+// 	if res.RowsAffected == 0 {
+// 		return nil, errors.New("movie creation unsuccessful")
 
-	}
-	return &moviepb.ReadMovieResponse{
+// 	}
+// 	return &moviepb.ReadMovieResponse{
 
-		Movie: &moviepb.Movie{
-			Id:    data.ID,
-			Title: data.Title,
-			Genre: data.Genre,
-		},
-	}, nil
+// 		Movie: &moviepb.Movie{
+// 			Id:    data.ID,
+// 			Title: data.Title,
+// 			Genre: data.Genre,
+// 		},
+// 	}, nil
 
-}
+// }
 func (*server) CreateMovie(ctx context.Context, req *moviepb.CreateMovieRequest) (*moviepb.CreateMovieResponse, error) {
 	fmt.Println("Create Movie")
 	movie := req.GetMovie()
@@ -118,45 +118,105 @@ func (*server) CreateMovie(ctx context.Context, req *moviepb.CreateMovieRequest)
 		},
 	}, nil
 }
+func (*server) GetMovie(ctx context.Context, req *moviepb.ReadMovieRequest) (*moviepb.ReadMovieResponse, error) {
+	fmt.Println("Read Movie", req.GetId())
+	var movie Movie
+	res := DB.Find(&movie, "id = ?", req.GetId())
+	if res.RowsAffected == 0 {
+		return nil, errors.New("movie not found")
+	}
+	return &moviepb.ReadMovieResponse{
+		Movie: &moviepb.Movie{
+			Id:    movie.ID,
+			Title: movie.Title,
+			Genre: movie.Genre,
+		},
+	}, nil
+}
 
 func (*server) GetMovies(ctx context.Context, req *moviepb.ReadMoviesRequest) (*moviepb.ReadMoviesResponse, error) {
-	fmt.Println("View All Movie")
+	fmt.Println("Read Movies")
 	movies := []*moviepb.Movie{}
-	res := DB.Table("movies").Select("id", "title", "genre").Scan(&movies)
+	res := DB.Find(&movies)
 	if res.RowsAffected == 0 {
-		return nil, errors.New("movie creation unsuccessful")
+		return nil, errors.New("movie not found")
 	}
-
 	return &moviepb.ReadMoviesResponse{
 		Movies: movies,
 	}, nil
 }
 
 func (*server) UpdateMovie(ctx context.Context, req *moviepb.UpdateMovieRequest) (*moviepb.UpdateMovieResponse, error) {
-	reqMovie := req.GetMovie()
-	fmt.Println(reqMovie)
-	res := DB.Model("").Select("id", "title", "genre").Where("id=?", reqMovie.Id).Updates(Movie{ID: reqMovie.Id, Genre: reqMovie.Genre, Title: reqMovie.Title})
-	if res.RowsAffected == 0 {
-		return nil, errors.New("movie updation unsuccessful")
-	}
-	return &moviepb.UpdateMovieResponse{
-		Movie: reqMovie,
-	}, nil
-}
-func (*server) DeleteMovie(ctx context.Context, req *moviepb.DeleteMovieRequest) (*moviepb.DeleteMovieResponse, error) {
-	fmt.Println("Delete Movie")
-	movieid := req.GetId()
+	fmt.Println("Update Movie")
 	var movie Movie
-	res := DB.First(&movie, "id=?", movieid)
+	reqMovie := req.GetMovie()
+
+	res := DB.Model(&movie).Where("id=?", reqMovie.Id).Updates(Movie{Title: reqMovie.Title, Genre: reqMovie.Genre})
 
 	if res.RowsAffected == 0 {
-		return nil, errors.New("Couldnt find movie")
+		return nil, errors.New("movies not found")
 	}
-	DB.Delete(&Movie{}, "id=?", movieid)
+
+	return &moviepb.UpdateMovieResponse{
+		Movie: &moviepb.Movie{
+			Id:    movie.ID,
+			Title: movie.Title,
+			Genre: movie.Genre,
+		},
+	}, nil
+}
+
+func (*server) DeleteMovie(ctx context.Context, req *moviepb.DeleteMovieRequest) (*moviepb.DeleteMovieResponse, error) {
+	fmt.Println("Delete Movie")
+	var movie Movie
+	res := DB.Where("id = ?", req.GetId()).Delete(&movie)
+	if res.RowsAffected == 0 {
+		return nil, errors.New("movie not found")
+	}
+
 	return &moviepb.DeleteMovieResponse{
 		Success: true,
 	}, nil
 }
+
+// func (*server) GetMovies(ctx context.Context, req *moviepb.ReadMoviesRequest) (*moviepb.ReadMoviesResponse, error) {
+// 	fmt.Println("View All Movie")
+// 	movies := []*moviepb.Movie{}
+// 	res := DB.Table("movies").Select("id", "title", "genre").Scan(&movies)
+// 	if res.RowsAffected == 0 {
+// 		return nil, errors.New("movie creation unsuccessful")
+// 	}
+
+// 	return &moviepb.ReadMoviesResponse{
+// 		Movies: movies,
+// 	}, nil
+// }
+
+// func (*server) UpdateMovie(ctx context.Context, req *moviepb.UpdateMovieRequest) (*moviepb.UpdateMovieResponse, error) {
+// 	reqMovie := req.GetMovie()
+// 	fmt.Println(reqMovie)
+// 	res := DB.Model("").Select("id", "title", "genre").Where("id=?", reqMovie.Id).Updates(Movie{ID: reqMovie.Id, Genre: reqMovie.Genre, Title: reqMovie.Title})
+// 	if res.RowsAffected == 0 {
+// 		return nil, errors.New("movie updation unsuccessful")
+// 	}
+// 	return &moviepb.UpdateMovieResponse{
+// 		Movie: reqMovie,
+// 	}, nil
+// }
+// func (*server) DeleteMovie(ctx context.Context, req *moviepb.DeleteMovieRequest) (*moviepb.DeleteMovieResponse, error) {
+// 	fmt.Println("Delete Movie")
+// 	movieid := req.GetId()
+// 	var movie Movie
+// 	res := DB.First(&movie, "id=?", movieid)
+
+// 	if res.RowsAffected == 0 {
+// 		return nil, errors.New("Couldnt find movie")
+// 	}
+// 	DB.Delete(&Movie{}, "id=?", movieid)
+// 	return &moviepb.DeleteMovieResponse{
+// 		Success: true,
+// 	}, nil
+// }
 
 func main() {
 	fmt.Println("gRPC server running ...")
