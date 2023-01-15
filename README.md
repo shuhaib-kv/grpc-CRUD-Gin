@@ -1,5 +1,5 @@
 # grpc-CRUD-Gin
-this is an mini project for understanding microservices architecture using grpc 
+this is an mini project for understanding microservices architecture using grpc .
 
 ## Features
 - Framework-Gin-Gonic
